@@ -8,7 +8,7 @@ This script installs and configures the Zabbix Agent on various Linux distributi
 To use this script, run the following command:
 
 ```sh
-curl -fsSL https://wmp.github.io/zabbix/install.sh | sh -s -- <Zabbix Server Address> [Zabbix Agent Version] [Hostname]
+curl -fsSL https://wmp.github.io/zabbix/install.sh | bash -s -- <Zabbix Server Address> [Zabbix Agent Version] [Hostname]
 
 
 
@@ -20,7 +20,7 @@ Arguments:
   [Hostname]               The hostname to be configured for the Zabbix Agent. If not provided, the system hostname will be used (optional).
 
 Example:
-  curl -fsSL https://wmp.github.io/zabbix/install.sh | sh -s -- zabbix.example.com 7.0 my-hostname
+  curl -fsSL https://wmp.github.io/zabbix/install.sh | bash -s -- zabbix.example.com 7.0 my-hostname
 ```
 
 This command installs the Zabbix Agent version 7.0, configures it to connect to `zabbix.example.com`, and sets the hostname to `my-hostname`.
