@@ -40,31 +40,50 @@ disable_zabbix_epel() {
     fi
 }
 
+# Function to download and check the file
+download_file() {
+    local url=$1
+    local output=$2
+    wget -q --spider $url
+    if [ $? -eq 0 ]; then
+        wget -O $output $url
+    else
+        echo "Failed to download $url"
+        exit 1
+    fi
+}
+
 # Function to install Zabbix agent on Debian-based systems
 install_zabbix_agent_debian() {
     local server_address=$1
     local agent_version=$2
 
+    base_url="https://repo.zabbix.com/zabbix/$agent_version"
+    debian_ver="debian${VER}"
+    ubuntu_ver="ubuntu${VER}"
+    
     case $OS in
         ubuntu)
             if [ "$ARCH" == "aarch64" ]; then
-                wget https://repo.zabbix.com/zabbix/${agent_version}/ubuntu-arm64/pool/main/z/zabbix-release/zabbix-release_${agent_version}+ubuntu${VER}_all.deb -P /tmp/
+                url="$base_url/ubuntu-arm64/pool/main/z/zabbix-release/zabbix-release_latest%2B${ubuntu_ver}_all.deb"
             else
-                wget https://repo.zabbix.com/zabbix/${agent_version}/ubuntu/pool/main/z/zabbix-release/zabbix-release_${agent_version}+ubuntu${VER}_all.deb -P /tmp/
+                url="$base_url/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest%2B${ubuntu_ver}_all.deb"
             fi
             ;;
         debian)
             if [ "$ARCH" == "aarch64" ]; then
-                wget https://repo.zabbix.com/zabbix/${agent_version}/debian-arm64/pool/main/z/zabbix-release/zabbix-release_${agent_version}+debian${VER}_all.deb -P /tmp/
+                url="$base_url/debian-arm64/pool/main/z/zabbix-release/zabbix-release_latest%2B${debian_ver}_all.deb"
             else
-                wget https://repo.zabbix.com/zabbix/${agent_version}/debian/pool/main/z/zabbix-release/zabbix-release_${agent_version}+debian${VER}_all.deb -P /tmp/
+                url="$base_url/debian/pool/main/z/zabbix-release/zabbix-release_latest%2B${debian_ver}_all.deb"
             fi
             ;;
         raspbian)
-            wget https://repo.zabbix.com/zabbix/${agent_version}/raspbian/pool/main/z/zabbix-release/zabbix-release_${agent_version}+debian${VER}_all.deb -P /tmp/
+            url="$base_url/raspbian/pool/main/z/zabbix-release/zabbix-release_latest%2B${debian_ver}_all.deb"
             ;;
     esac
-    dpkg -i /tmp/zabbix-release_${agent_version}+${OS}${VER}_all.deb
+
+    download_file $url /tmp/zabbix-release_latest_${OS}${VER}.deb
+    dpkg -i /tmp/zabbix-release_latest_${OS}${VER}.deb
     apt update
     apt install -y zabbix-agent2
 }
@@ -75,23 +94,28 @@ install_zabbix_agent_redhat() {
     local agent_version=$2
 
     disable_zabbix_epel
+    base_url="https://repo.zabbix.com/zabbix/$agent_version"
+    
     case $OS in
         almalinux)
-            rpm -Uvh https://repo.zabbix.com/zabbix/${agent_version}/alma/9/x86_64/zabbix-release-${agent_version}-4.el9.noarch.rpm
+            url="$base_url/alma/9/x86_64/zabbix-release-latest.el9.noarch.rpm"
             ;;
         centos)
-            rpm -Uvh https://repo.zabbix.com/zabbix/${agent_version}/centos/9/x86_64/zabbix-release-${agent_version}-4.el9.noarch.rpm
+            url="$base_url/centos/9/x86_64/zabbix-release-latest.el9.noarch.rpm"
             ;;
         ol)
-            rpm -Uvh https://repo.zabbix.com/zabbix/${agent_version}/oracle/9/x86_64/zabbix-release-${agent_version}-4.el9.noarch.rpm
+            url="$base_url/oracle/9/x86_64/zabbix-release-latest.el9.noarch.rpm"
             ;;
         rhel)
-            rpm -Uvh https://repo.zabbix.com/zabbix/${agent_version}/rhel/9/x86_64/zabbix-release-${agent_version}-4.el9.noarch.rpm
+            url="$base_url/rhel/9/x86_64/zabbix-release-latest.el9.noarch.rpm"
             ;;
         rocky)
-            rpm -Uvh https://repo.zabbix.com/zabbix/${agent_version}/rocky/9/x86_64/zabbix-release-${agent_version}-4.el9.noarch.rpm
+            url="$base_url/rocky/9/x86_64/zabbix-release-latest.el9.noarch.rpm"
             ;;
     esac
+
+    download_file $url /tmp/zabbix-release-latest.el9.noarch.rpm
+    rpm -Uvh /tmp/zabbix-release-latest.el9.noarch.rpm
     yum clean all
     yum install -y zabbix-agent2
 }
@@ -101,7 +125,11 @@ install_zabbix_agent_suse() {
     local server_address=$1
     local agent_version=$2
 
-    rpm -Uvh --nosignature https://repo.zabbix.com/zabbix/${agent_version}/sles/15/x86_64/zabbix-release-${agent_version}-2.sles15.noarch.rpm
+    base_url="https://repo.zabbix.com/zabbix/$agent_version"
+    url="$base_url/sles/15/x86_64/zabbix-release-latest.sles15.noarch.rpm"
+
+    download_file $url /tmp/zabbix-release-latest.sles15.noarch.rpm
+    rpm -Uvh --nosignature /tmp/zabbix-release-latest.sles15.noarch.rpm
     zypper --gpg-auto-import-keys refresh 'Zabbix Official Repository'
     zypper refresh
     zypper install -y zabbix-agent2
