@@ -25,26 +25,6 @@ Example:
 
 This command installs the Zabbix Agent version 7.0, configures it to connect to `zabbix.example.com`, and sets the hostname to `my-hostname`.
 
-### Help
-
-To display help message, run:
-
-```sh
-curl -fsSL https://<username>.github.io/<repository>/install.sh | sh -s -- --help
-
-
-Usage: install.sh <Zabbix Server Address> [Zabbix Agent Version] [Hostname]
-
-Arguments:
-  <Zabbix Server Address>  The address of the Zabbix server (required).
-  [Zabbix Agent Version]   The version of the Zabbix Agent to install. If not provided, the latest version will be used (optional).
-  [Hostname]               The hostname to be configured for the Zabbix Agent. If not provided, the system hostname will be used (optional).
-
-Example:
-  curl -fsSL https://wmp.github.io/zabbix-install/install.sh | sh -s -- zabbix.example.com 7.0 my-hostname
-```
-
-
 ## Script Details
 
 The script performs the following steps:
