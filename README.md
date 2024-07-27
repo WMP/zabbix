@@ -9,9 +9,10 @@ To use this script, run the following command:
 
 ```sh
 curl -fsSL https://wmp.github.io/zabbix/install.sh | bash -s -- <Zabbix Server Address> [Zabbix Agent Version] [Hostname]
+```
 
 
-
+```sh
 Usage: install.sh <Zabbix Server Address> [Zabbix Agent Version] [Hostname]
 
 Arguments:
