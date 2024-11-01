@@ -21,15 +21,30 @@ detect_os() {
     fi
 }
 
-# Function to fetch the latest Zabbix agent version
+# Function to fetch the latest Zabbix agent version, with support for unstable releases
 get_latest_version() {
+    # Find the latest available version
     latest_version=$(curl -s https://repo.zabbix.com/zabbix/ | grep -oP 'href="([0-9]+\.[0-9]+)/"' | grep -oP '[0-9]+\.[0-9]+' | sort -V | tail -n 1)
-    if [ -z "$latest_version" ]; then
-        echo "Unable to determine the latest Zabbix agent version"
-        exit 1
+    
+    # Check if the latest version is an unstable release
+    if curl --output /dev/null --silent --head --fail "https://repo.zabbix.com/zabbix/${latest_version}/release/"; then
+        # If the latest version is unstable, get the previous stable version
+        previous_version=$(curl -s https://repo.zabbix.com/zabbix/ | grep -oP 'href="([0-9]+\.[0-9]+)/"' | grep -oP '[0-9]+\.[0-9]+' | sort -V | grep -B 1 "$latest_version" | head -n 1)
+        if [ -z "$previous_version" ]; then
+            echo "Unable to determine the previous stable Zabbix agent version"
+            exit 1
+        fi
+        echo "$previous_version"
+    else
+        # If the latest version is stable, return it
+        if [ -z "$latest_version" ]; then
+            echo "Unable to determine the latest Zabbix agent version"
+            exit 1
+        fi
+        echo "$latest_version"
     fi
-    echo "$latest_version"
 }
+
 
 # Function to disable Zabbix packages in EPEL repository
 disable_zabbix_epel() {
